@@ -10,9 +10,11 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
+    model.cpp \
     startup.cpp
 
 HEADERS += \
+    model.h \
     startup.h
 
 FORMS += \

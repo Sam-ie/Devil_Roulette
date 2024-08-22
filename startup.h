@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QMessageBox>
+#include "model.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -10,7 +11,7 @@ class Startup;
 }
 QT_END_NAMESPACE
 
-class Startup : public QWidget 
+class Startup : public QWidget
 {
     Q_OBJECT
 
@@ -23,5 +24,7 @@ private slots:
 
 private:
     Ui::Startup *ui;
+
+    Model m;
 };
 #endif // STARTUP_H
