@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>878</width>
-    <height>599</height>
+    <width>960</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Startup</string>
+   <string>恶魔轮盘</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">font: 12pt &quot;华文楷体&quot;;</string>
+   <string notr="true">font: 14pt &quot;华文楷体&quot;;</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
@@ -37,75 +37,42 @@
 	background-color: rgba(170, 170, 50, 150);
 }</string>
      </property>
-     <widget class="QLineEdit" name="lineEdit_3">
-      <property name="geometry">
-       <rect>
-        <x>100</x>
-        <y>20</y>
-        <width>351</width>
-        <height>61</height>
-       </rect>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="lineEdit_2">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>250</y>
-        <width>551</width>
-        <height>51</height>
-       </rect>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
      <widget class="QGroupBox" name="groupBox">
       <property name="geometry">
        <rect>
         <x>10</x>
         <y>100</y>
-        <width>551</width>
-        <height>131</height>
+        <width>441</width>
+        <height>191</height>
        </rect>
       </property>
       <property name="title">
        <string>对手</string>
       </property>
-      <widget class="QLineEdit" name="lineEdit_4">
+      <widget class="QTextEdit" name="textEdit_2">
        <property name="geometry">
         <rect>
-         <x>20</x>
+         <x>10</x>
          <y>30</y>
-         <width>511</width>
-         <height>81</height>
+         <width>421</width>
+         <height>151</height>
         </rect>
        </property>
+       <property name="styleSheet">
+        <string notr="true">font: 13pt &quot;华文楷体&quot;;</string>
+       </property>
+       <property name="overwriteMode">
+        <bool>true</bool>
+       </property>
       </widget>
-     </widget>
-     <widget class="QLineEdit" name="lineEdit">
-      <property name="geometry">
-       <rect>
-        <x>580</x>
-        <y>20</y>
-        <width>271</width>
-        <height>561</height>
-       </rect>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
      </widget>
      <widget class="QGroupBox" name="groupBox_2">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>320</y>
-        <width>551</width>
-        <height>261</height>
+        <y>300</y>
+        <width>601</width>
+        <height>281</height>
        </rect>
       </property>
       <property name="title">
@@ -119,7 +86,7 @@
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="pushButton_1">
             <property name="text">
              <string>放大镜</string>
             </property>
@@ -170,14 +137,14 @@
           <item row="2" column="1">
            <widget class="QPushButton" name="pushButton_8">
             <property name="text">
-             <string>肾上腺素</string>
+             <string>窃贼手套</string>
             </property>
            </widget>
           </item>
           <item row="2" column="2">
-           <widget class="QPushButton" name="pushButton_23">
+           <widget class="QPushButton" name="pushButton_9">
             <property name="text">
-             <string>一次性手机</string>
+             <string>小灵通</string>
             </property>
            </widget>
           </item>
@@ -185,27 +152,72 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QPushButton" name="pushButton_11">
+        <widget class="QPushButton" name="pushButton_12">
          <property name="text">
           <string>帮助</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QPushButton" name="pushButton_9">
+        <widget class="QPushButton" name="pushButton_10">
          <property name="text">
           <string>向自己开枪</string>
          </property>
         </widget>
        </item>
        <item row="1" column="2">
-        <widget class="QPushButton" name="pushButton_10">
+        <widget class="QPushButton" name="pushButton_11">
          <property name="text">
           <string>向对手开枪</string>
          </property>
         </widget>
        </item>
       </layout>
+     </widget>
+     <widget class="QTextEdit" name="textEdit">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>20</y>
+        <width>381</width>
+        <height>71</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 18pt;</string>
+      </property>
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+      <property name="overwriteMode">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QTextEdit" name="textEdit_3">
+      <property name="geometry">
+       <rect>
+        <x>470</x>
+        <y>110</y>
+        <width>141</width>
+        <height>181</height>
+       </rect>
+      </property>
+      <property name="overwriteMode">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QTextEdit" name="textEdit_4">
+      <property name="geometry">
+       <rect>
+        <x>630</x>
+        <y>20</y>
+        <width>311</width>
+        <height>561</height>
+       </rect>
+      </property>
+      <property name="overwriteMode">
+       <bool>false</bool>
+      </property>
      </widget>
     </widget>
    </item>

@@ -20,7 +20,11 @@ public:
     ~Startup();
 
 private slots:
-    void on_pushButton_11_clicked();
+    void on_pushButton_12_clicked();
+
+private:
+    void change_btn_enable();
+    void update_shown_text(QString rival_ation="");
 
 private:
     Ui::Startup *ui;
