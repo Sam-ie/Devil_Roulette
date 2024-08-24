@@ -1,10 +1,15 @@
 #include <model.h>
 
+Model& Model::getInstance() {
+    static Model instance;
+    return instance;
+}
+
 Model::Model()
 {
     loadSettings();
     if (gun_status.size()==0)
-        newRound();
+        newTurn();
 }
 
 Model::~Model()
@@ -12,7 +17,7 @@ Model::~Model()
     saveSettings();
 }
 
-int Model::use_item(int user,int item_num,int towards_item_num=0)
+void Model::use_item(int user,int item_num,int towards_item_num)
 {
     if (user==0)
         rival_items[item_num]--;
@@ -39,7 +44,7 @@ int Model::use_item(int user,int item_num,int towards_item_num=0)
         if (QRandomGenerator::global()->bounded(10)<4)
             blood[user]=std::min(std::min(5,2+level/2),blood[user]+2);
         else
-            blood[user]--;
+            blood[user]=std::max(blood[user]-1,0);
         break;
     case 7:
         if (user==0)
@@ -56,65 +61,88 @@ int Model::use_item(int user,int item_num,int towards_item_num=0)
     default:
         break;
     }
-    return end_level();
 }
 
-int Model::shoot(int shooter,int victim)
+void Model::shoot(int shooter,int victim)
 {
     if (shooter==victim&&gun_status.head()==0)
         jump_next[!shooter]=true;
-    if (shooter!=victim)
-        blood[victim]-=gun_status.head();
+    blood[victim]=std::max(blood[victim]-gun_status.head(),0);
     whos_turn=!whos_turn;
     if (jump_next[whos_turn])
     {
         jump_next[whos_turn]=false;
         whos_turn=!whos_turn;
     }
-
+    gun_status.dequeue();
     if (!gun_status.size())
-        newRound();
-    return end_level();
+        newTurn();
 }
 
-int Model::end_level()
+int Model::determined_winner()
 {
-    if (blood[0]==0)
+    int return_index=0;
+    if (blood[0]!=0&&blood[1]!=0)
+        return return_index;
+    else if (blood[0]==0)
     {
-        level++;
-        blood[0]=blood[1]=std::min(5,2+level/2);
-        gun_status.clear();
-        for (int i = 0; i < 9; ++i)
-        {
-            rival_items[i]=0;
-            player_items[i]=0;
-        }
-        jump_next[0]=jump_next[1]=false;
-        newRound();
-        return 1;
+        winning_round++;
+        return_index=1;
     }
-    if (blood[1]==0)
+    else
+        return_index=-1;
+
+    int max_round=std::min(level/5*2+3,5);
+    round++;
+    if (round-winning_round>max_round/2+1||winning_round>max_round/2)
     {
-        level=std::max(1,level-3);
-        blood[0]=blood[1]=std::min(5,2+level/2);
-        gun_status.clear();
-        for (int i = 0; i < 9; ++i)
+        if (winning_round<=max_round/2)
         {
-            rival_items[i]=0;
-            player_items[i]=0;
+            return_index=-2;
+            if (level<20)
+                level=std::max(level-3,1);
+            else
+                level=std::max(level-3,20);
         }
-        jump_next[0]=jump_next[1]=false;
-        newRound();
-        return -1;
+        else
+        {
+            return_index=2;
+            level++;
+        }
+        round=1;
+        winning_round=0;
     }
-    return 0;
+
+    blood[0]=blood[1]=std::min(5,2+level/2);
+    gun_status.clear();
+    for (int i = 0; i < 9; ++i)
+    {
+        rival_items[i]=0;
+        player_items[i]=0;
+    }
+    jump_next[0]=jump_next[1]=false;
+    newTurn();
+
+    return return_index;
 }
 
-void Model::newRound()
+void Model::newTurn()
 {
-    int bullet_num=std::min(10,2+level+2*round);
+    int bullet_num=std::min(10,2+level);
+    // 使用当前时间作为随机数生成器的种子
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator(seed);
+
+    // 使用 std::normal_distribution 来生成接近均值的随机数
+    std::normal_distribution<double> distribution(0.5, 0.1); // 均值为 0.5，标准差较小
+
     for (int i = 0; i < bullet_num; ++i) {
-        gun_status.enqueue(QRandomGenerator::global()->bounded(2));
+        double randomValue = distribution(generator);
+        if (randomValue >= 0.5) {
+            gun_status.enqueue(1);
+        } else {
+            gun_status.enqueue(0);
+        }
     }
     for (int i = 0; i < 9; ++i) // 注释此处即可各轮间继承道具
     {
@@ -122,19 +150,23 @@ void Model::newRound()
         player_items[i]=0;
     }
     int items_num=std::min(8,level-1);
-    if (level<=5)
-    {
-        for (int i = 0; i < items_num; ++i) {
-            rival_items[QRandomGenerator::global()->bounded(5)]++;
-            player_items[QRandomGenerator::global()->bounded(5)]++;
+    int select_range=(level<5)?5:9;
+    QVector<int> indices_rival,indices_player;
+    for (int i = 0; i < select_range; ++i) { // 每个道具最多有四个
+        for (int j=0;j<4;j++)
+        {
+            indices_rival.append(i);
+            indices_player.append(i);
         }
     }
-    else
-    {
-        for (int i = 0; i < items_num; ++i) {
-            rival_items[QRandomGenerator::global()->bounded(9)]++;
-            player_items[QRandomGenerator::global()->bounded(9)]++;
-        }
+    std::ranges::shuffle(indices_rival, std::mt19937{std::random_device{}()});
+    std::ranges::shuffle(indices_player, std::mt19937{std::random_device{}()});
+
+    for (int i = 0; i < items_num; ++i) {
+        int index = indices_rival.takeFirst();
+        rival_items[index]++;
+        index = indices_rival.takeFirst();
+        player_items[index]++;
     }
 }
 
@@ -149,6 +181,7 @@ bool Model::saveSettings()
     // Save variables
     settings.setValue("level", level);
     settings.setValue("round", round);
+    settings.setValue("winning_round", winning_round);
     settings.setValue("whos_turn", whos_turn);
 
     // Convert and save blood array
@@ -197,6 +230,7 @@ bool Model::loadSettings()
     // Load variables
     level = settings.value("level", 1).toInt();
     round = settings.value("round", 1).toInt();
+    winning_round = settings.value("winning_round", 0).toInt();
     whos_turn = settings.value("whos_turn", 1).toInt();
 
     // Load blood array

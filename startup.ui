@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>960</width>
+    <width>1000</width>
     <height>600</height>
    </rect>
   </property>
@@ -109,7 +109,7 @@
           <item row="1" column="0">
            <widget class="QPushButton" name="pushButton_4">
             <property name="text">
-             <string>啤酒</string>
+             <string>护木</string>
             </property>
            </widget>
           </item>
@@ -209,9 +209,9 @@
      <widget class="QTextEdit" name="textEdit_4">
       <property name="geometry">
        <rect>
-        <x>630</x>
+        <x>620</x>
         <y>20</y>
-        <width>311</width>
+        <width>371</width>
         <height>561</height>
        </rect>
       </property>

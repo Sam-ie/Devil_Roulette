@@ -7,19 +7,25 @@
 #include <QFileInfo>
 #include <QQueue>
 #include <QRandomGenerator>
+#include <chrono>
 
 class Model
 {
 public:
-    Model();
+    static Model& getInstance();
+    Model(const Model&) = delete;
+    Model& operator=(const Model&) = delete;
     ~Model();
 
-    int use_item(int user,int item_num,int towards_item_num); // 0-8
-    int shoot(int shooter,int victim);
+    void use_item(int user,int item_num,int towards_item_num=0); // 0-8
+    void shoot(int shooter,int victim);
+    int determined_winner();
 
 public:
-    int level; // 第几局
-    int round; // 第几轮
+    int level; // 第几关
+    int round; // 第几局
+    int winning_round;
+
     int whos_turn;
     int blood[2]; // 0是对手，1是玩家
     QQueue<int> gun_status; // >0是实弹，=0是空包弹
@@ -28,10 +34,10 @@ public:
     bool jump_next[2];
 
 private:
+    Model();
     bool saveSettings();
     bool loadSettings();
-    void newRound();
-    int end_level();
+    void newTurn(); // 新一轮
 };
 
 #endif // MODEL_H
