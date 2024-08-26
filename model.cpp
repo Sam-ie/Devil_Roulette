@@ -1,4 +1,5 @@
 #include <model.h>
+#include <ai.h>
 
 Model& Model::getInstance() {
     static Model instance;
@@ -32,6 +33,7 @@ void Model::use_item(int user,int item_num,int towards_item_num)
         jump_next[!user]=true;
         break;
     case 3:
+        AI::getInstance().set_shoot(-1);
         gun_status.dequeue();
         break;
     case 4:
@@ -74,6 +76,7 @@ void Model::shoot(int shooter,int victim)
         jump_next[whos_turn]=false;
         whos_turn=!whos_turn;
     }
+    AI::getInstance().set_shoot(gun_status.head());
     gun_status.dequeue();
     if (!gun_status.size())
         newTurn();
@@ -144,6 +147,7 @@ void Model::newTurn()
             gun_status.enqueue(0);
         }
     }
+    AI::getInstance().reload();
     for (int i = 0; i < 9; ++i) // 注释此处即可各轮间继承道具
     {
         rival_items[i]=0;

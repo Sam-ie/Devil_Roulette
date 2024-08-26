@@ -19,9 +19,7 @@ Startup::Startup(QWidget *parent)
 
     change_btn_enable();
     update_shown_text("",QString("<center>第%1关<br/>第%2局</center>").arg(Model::getInstance().level).arg(Model::getInstance().round));
-    if (Model::getInstance().level==1)
-        update_shown_text("","<br/>欢迎！本游戏改编自steam游戏《Buckshot Roulette》，你的对手是一名来自深渊的恶魔！第一关只开放了开枪按钮，如果对自己开空枪，可以获得额外的开枪回合。"
-                              "如果对对手射击实弹，可以削减对手的血量。一方血量为0，本局结束。更多关于如何操作，请查看“帮助”。<br/>");
+    set_level_hint();
     if (Model::getInstance().whos_turn==0)
         get_AI_move();
 }
@@ -42,9 +40,9 @@ void Startup::on_pushButton_12_clicked()
     QTextEdit *textEdit = new QTextEdit(&dialog);
     textEdit->setReadOnly(true); // 设置只读，防止编辑
     textEdit->setText("在自己血量不为0的前提下，将对手血量削减到0！\n对手AI水平随关数越来越高，看看你能坚持几关？\n\n"
-                      "道具说明：\n【放大镜】检查弹膛中当前的子弹。\n【香烟】消除压力，恢复1点生命值。\n【手铐】对方下一回合无法行动（不可叠加）。\n【护木】弹出霰弹枪膛内当前的子弹。\n"
+                      "道具说明：\n【放大镜】检查弹膛中当前的子弹。\n【香烟】消除压力，恢复1点生命值。\n【手铐】对方下一回合无法行动（不可叠加，和射自己的跳过效果覆盖）。\n【护木】弹出霰弹枪膛内当前的子弹。\n"
                       "【手锯】霰弹枪造成2点伤害（不可叠加）。\n【逆转器】切换弹膛内当前子弹为实弹或空包弹(实弹换空包弹，空包弹换实弹)。\n【过期药品】有40%的几率恢复2点生命值，否则将损失1点生命值。\n"
-                      "【窃贼手套】偷窃一件物品并立即使用。\n【小灵通】一个神秘的声音，让你窥探未来(告诉你枪里第几颗子弹是实弹还是空包弹，不能查看当前子弹)。\n\n"
+                      "【窃贼手套】偷窃一件物品并立即使用。\n【小灵通】一个神秘的声音，让你窥探未来(告诉你枪里第几颗子弹是实弹还是空包弹，不能查看当前子弹，告诉的数量随枪中子弹数变化，最多3个)。\n\n"
                       "策略说明：\n向自己开枪，如果枪中为空包弹，对手跳过下一回合。\n向对手开枪，如果枪中为实弹，对手损失相应伤害的生命值。\n"
                       "霰弹枪每轮重新装弹，会分发一定数量的道具。\n在自己回合内，可以自由使用自己持有的任意数量道具。\n各局之间，道具不继承，先手顺序将会继承。\n霰弹枪会重复装弹，直到一方血量为0。");
 
@@ -53,7 +51,7 @@ void Startup::on_pushButton_12_clicked()
 
     layout->addWidget(textEdit);
 
-    dialog.setFixedSize(600, 540); // 设置对话框的固定大小
+    dialog.setFixedSize(660, 560); // 设置对话框的固定大小
 
     dialog.exec();
 }
@@ -156,6 +154,86 @@ void Startup::update_shown_text(QString rival_ation,QString text_log_addition)
     ui->textEdit_4->setTextCursor(cursor);
 }
 
+void Startup::set_level_hint()
+{
+    switch (Model::getInstance().level) {
+    case 1:
+        update_shown_text("","<br/>欢迎！本游戏改编自steam游戏《Buckshot Roulette》，你的对手是一名来自深渊的恶魔！第一关只开放了开枪按钮，如果对自己开空枪，可以获得额外的开枪回合。"
+                              "如果对对手射击实弹，可以削减对手的血量。一方血量为0，本局结束。更多关于如何操作，请查看“帮助”。<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    case 2:
+        update_shown_text("","<br/>从本关开始，你将获得前五个道具中的若干个。注意每局间道具不继承，所以请尽量使用道具，避免浪费。关于道具的详细功能，请查看“帮助”。<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    case 3:
+        update_shown_text("","<br/>警告！恶魔对手变聪明了，他不再胡乱开枪，而是会预测下一发为实弹的概率。他不会使用道具，局势仍然对你有利。<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    case 4:
+        update_shown_text("","<br/>随着关数的增加，每关局数、双方血量上限、每轮子弹数量、每轮道具数量会逐渐增加，可操作性和策略性会逐渐加强。<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    case 5:
+        update_shown_text("","<br/>从本关开始，开放了全部道具的获取。关于额外道具的详细功能，请查看“帮助”。<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    case 6:
+        update_shown_text("","<br/>警告！恶魔对手变得更聪明了，他短暂获得了预知子弹的能力，这意味着你每次将枪交到他的手里，你必然会损失1点血量。"
+                              "但他还不会使用道具，充分利用道具来击败他吧！<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    case 7:
+        update_shown_text("","<br/>如果你在关卡中失败，你不会从头重新开始，而是回溯时间到三关前。<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    case 8:
+        update_shown_text("","<br/>现在开始，每关局数、双方血量上限、每轮子弹数量、每轮道具数量不再增加，请充分享受完整的游戏。<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    case 9:
+        update_shown_text("","<br/>警告！恶魔对手的智商已经接近人类水平，他失去了预知能力，但学会了使用道具。但他仍然偶有失误，会记错子弹状态，做出愚蠢的决策。<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    case 13:
+        update_shown_text("","<br/>警告！恶魔对手的智商已经升级到人类的最高水平，他会充分利用道具和自己获得的每一条信息，做出最符合逻辑的动作。<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    case 17:
+        update_shown_text("","<br/>警告！恶魔对手已经进入神之领域，他的动作优雅而致命，并且绝不会失误。和他对决是绝对愚蠢的行为，你只能祈求于逆天的气运。这是一场不公平的豪赌！<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    case 20:
+        update_shown_text("","<br/>恭喜！神已被你击败，触发隐藏彩蛋，作者的QQ号：1163429473。接下来是无尽模式，你将和接近人类最高水平的对手公平对决。<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    case 21:
+        update_shown_text("","<br/>为了避免玩家输了之后回到17-20关渡劫，作者设置了无尽模式掉段最多就掉到20关，是不是很贴心? ^_^<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    case 22:
+        update_shown_text("","<br/>接下来将不再有作者的话，请以更高的关卡数为目标努力吧！<br/>");
+        QApplication::processEvents();
+        QThread::msleep(2400);
+        break;
+    default:
+        break;
+    }
+}
+
 void Startup::end_level()
 {
     int flag=Model::getInstance().determined_winner();
@@ -195,82 +273,7 @@ void Startup::end_level()
     {
         QApplication::processEvents();
         QThread::msleep(800);
-        switch (Model::getInstance().level) {
-        case 1:
-            update_shown_text("","<br/>欢迎！本游戏改编自steam游戏《Buckshot Roulette》，你的对手是一名来自深渊的恶魔！第一关只开放了开枪按钮，如果对自己开空枪，可以获得额外的开枪回合。"
-                                  "如果对对手射击实弹，可以削减对手的血量。一方血量为0，本局结束。更多关于如何操作，请查看“帮助”。<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        case 2:
-            update_shown_text("","<br/>从本关开始，你将获得前五个道具中的若干个。注意每局间道具不继承，所以请尽量使用道具，避免浪费。关于道具的详细功能，请查看“帮助”。<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        case 3:
-            update_shown_text("","<br/>警告！恶魔对手变聪明了，他不再胡乱开枪，而是会预测下一发为实弹的概率。他不会使用道具，局势仍然对你有利。<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        case 4:
-            update_shown_text("","<br/>随着关数的增加，每关局数、双方血量上限、每轮子弹数量、每轮道具数量会逐渐增加，可操作性和策略性会逐渐加强。<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        case 5:
-            update_shown_text("","<br/>从本关开始，开放了全部道具的获取。关于额外道具的详细功能，请查看“帮助”。<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        case 6:
-            update_shown_text("","<br/>警告！恶魔对手变得更聪明了，他短暂获得了预知子弹的能力，这意味着你每次将枪交到他的手里，你必然会损失1点血量。"
-                                  "但他还不会使用道具，充分利用道具来击败他吧！<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        case 7:
-            update_shown_text("","<br/>如果你在关卡中失败，你不会从头重新开始，而是回溯时间到三关前。<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        case 8:
-            update_shown_text("","<br/>现在开始，每关局数、双方血量上限、每轮子弹数量、每轮道具数量不再增加，请充分享受完整的游戏。<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        case 9:
-            update_shown_text("","<br/>警告！恶魔对手的智商已经接近人类水平，他失去了预知能力，但学会了使用道具。但他仍然偶有失误，会记错子弹状态，做出愚蠢的决策。<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        case 13:
-            update_shown_text("","<br/>警告！恶魔对手的智商已经升级到人类的最高水平，他会充分利用道具和自己获得的每一条信息，做出最符合逻辑的动作。<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        case 17:
-            update_shown_text("","<br/>警告！恶魔对手已经进入神之领域，他的动作优雅而致命，并且绝不会失误。和他对决是绝对愚蠢的行为，你只能祈求于逆天的气运。这是一场不公平的豪赌！<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        case 20:
-            update_shown_text("","<br/>恭喜！神已被你击败，触发隐藏彩蛋，作者的QQ号：1163429473。接下来是无尽模式，你将和接近人类最高水平的对手公平对决。<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        case 21:
-            update_shown_text("","<br/>为了避免玩家输了之后回到17-20关渡劫，作者设置了无尽模式掉段最多就掉到20关，是不是很贴心? ^_^<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        case 22:
-            update_shown_text("","<br/>接下来将不再有作者的话，请以更高的关卡数为目标努力吧！<br/>");
-            QApplication::processEvents();
-            QThread::msleep(2400);
-            break;
-        default:
-            break;
-        }
+        set_level_hint();
     }
     update_shown_text("",QString("霰弹枪装弹，当前%1发实弹，%2发空包弹<br/>").arg(count_true).arg(count_false));
 }
@@ -394,16 +397,26 @@ void Startup::on_pushButton_8_clicked()
 void Startup::on_pushButton_9_clicked()
 {
     Model::getInstance().use_item(1,8);
-    // 使用当前时间作为随机数生成器的种子
+
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
+    std::vector<int> values(Model::getInstance().gun_status.size());
+    for (int i = 0; i < Model::getInstance().gun_status.size(); ++i) {
+        values[i] = i + 1;
+    }
 
-    // 定义分布范围
-    std::uniform_int_distribution<int> distribution(1, Model::getInstance().gun_status.size());
+    // 打乱序列
+    std::shuffle(values.begin(), values.end(), generator);
+    std::vector<int> random_numbers(values.begin(), values.begin() + (Model::getInstance().gun_status.size() + 3) / 4);
+    std::sort(random_numbers.begin(), random_numbers.end());
 
-    // 生成一个随机数
-    int random_number = distribution(generator);
-    update_shown_text("",QString("你呼叫了场外，场外告诉你第%1发子弹是%2<br/>").arg(random_number).arg(Model::getInstance().gun_status[random_number-1]==0?"空包弹":"实弹"));
+    QString str="你呼叫了场外，场外告诉你";
+    for (int random_number : random_numbers)
+    {
+        str+=QString("，第%1发子弹是%2").arg(random_number).arg(Model::getInstance().gun_status[random_number-1]==0?"空包弹":"实弹");
+    }
+    str+="<br/>";
+    update_shown_text("",str);
     change_btn_enable();
 }
 
@@ -478,8 +491,10 @@ void Startup::on_pushButton_11_clicked()
 void Startup::get_AI_move()
 {
     QApplication::processEvents();
-    QThread::msleep(2400);
+    QThread::msleep(2200);
     int move_index=AI::getInstance().get_action();
+
+choice_switch:
     switch (move_index) {
     case 1:
         Model::getInstance().use_item(0,0);
@@ -541,12 +556,33 @@ void Startup::get_AI_move()
         QString btnText[9]={"放大镜","香烟","手铐","护木","手锯","逆转器","过期药品","窃贼手套","小灵通"};
         update_shown_text("对手使用了窃贼手套",QString("对手趁你不注意，偷走了你的%1，并立即使用<br/>").arg(btnText[AI::getInstance().want_steal-1]));
         if (AI::getInstance().want_steal!=8)
-            Model::getInstance().use_item(0,AI::getInstance().want_steal-1);
+        {
+            move_index=AI::getInstance().want_steal;
+            goto choice_switch;
+        }
     }
         break;
     case 9:
+    {
         Model::getInstance().use_item(0,8);
-        update_shown_text("对手使用了小灵通","对手呼叫了场外，场外告诉了他某发子弹的位置");
+
+        unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+        std::default_random_engine generator(seed);
+        std::vector<int> values(Model::getInstance().gun_status.size());
+        for (int i = 0; i < Model::getInstance().gun_status.size(); ++i) {
+            values[i] = i + 1;
+        }
+
+        // 打乱序列
+        std::shuffle(values.begin(), values.end(), generator);
+        std::vector<int> random_numbers(values.begin(), values.begin() + (Model::getInstance().gun_status.size() + 3) / 4);
+        std::sort(random_numbers.begin(), random_numbers.end());
+
+        for (int random_number : random_numbers)
+            AI::getInstance().bullet_known(random_number,Model::getInstance().gun_status[random_number]);
+
+        update_shown_text("对手使用了小灵通","对手呼叫了场外，场外告诉了他某些子弹的位置");
+    }
         break;
     case 10:
     {

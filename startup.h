@@ -51,6 +51,7 @@ private slots:
 
 private:
     void change_btn_enable();
+    void set_level_hint();
     void update_shown_text(QString rival_ation="",QString text_log_addition="");
     void end_level();
     void get_AI_move();
