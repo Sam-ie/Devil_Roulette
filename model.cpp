@@ -27,13 +27,13 @@ void Model::use_item(int user,int item_num,int towards_item_num)
 
     switch (item_num) {
     case 1:
-        blood[user]=std::min(std::min(5,2+level/2),blood[user]+1);
+        blood[user]=std::min(std::min(7,(level+5)/2),blood[user]+1);
         break;
     case 2:
         jump_next[!user]=true;
         break;
     case 3:
-        AI::getInstance().set_shoot(-1);
+        AI::getInstance().set_shoot(gun_status.head());
         gun_status.dequeue();
         break;
     case 4:
@@ -44,7 +44,7 @@ void Model::use_item(int user,int item_num,int towards_item_num)
         break;
     case 6:
         if (QRandomGenerator::global()->bounded(10)<4)
-            blood[user]=std::min(std::min(5,2+level/2),blood[user]+2);
+            blood[user]=std::min(std::min(7,(level+5)/2),blood[user]+2);
         else
             blood[user]=std::max(blood[user]-1,0);
         break;
@@ -116,7 +116,7 @@ int Model::determined_winner()
         winning_round=0;
     }
 
-    blood[0]=blood[1]=std::min(5,2+level/2);
+    blood[0]=blood[1]=std::min(7,(level+5)/2);
     gun_status.clear();
     for (int i = 0; i < 9; ++i)
     {
@@ -147,7 +147,7 @@ void Model::newTurn()
             gun_status.enqueue(0);
         }
     }
-    AI::getInstance().reload();
+    AI::getInstance().reload(gun_status);
     for (int i = 0; i < 9; ++i) // 注释此处即可各轮间继承道具
     {
         rival_items[i]=0;
@@ -222,6 +222,8 @@ bool Model::saveSettings()
     }
     settings.setValue("jump_next", jumpNextList);
 
+    AI::getInstance().saveSettings();
+
     return settings.status() == QSettings::NoError;
 }
 
@@ -281,6 +283,8 @@ bool Model::loadSettings()
             jump_next[i] = false;
         }
     }
+
+    AI::getInstance().loadSettings();
 
     return settings.status() == QSettings::NoError;
 }

@@ -20,6 +20,7 @@ Startup::Startup(QWidget *parent)
     change_btn_enable();
     update_shown_text("",QString("<center>第%1关<br/>第%2局</center>").arg(Model::getInstance().level).arg(Model::getInstance().round));
     set_level_hint();
+    AI::getInstance().reload(Model::getInstance().gun_status);
     if (Model::getInstance().whos_turn==0)
         get_AI_move();
 }
@@ -40,7 +41,7 @@ void Startup::on_pushButton_12_clicked()
     QTextEdit *textEdit = new QTextEdit(&dialog);
     textEdit->setReadOnly(true); // 设置只读，防止编辑
     textEdit->setText("在自己血量不为0的前提下，将对手血量削减到0！\n对手AI水平随关数越来越高，看看你能坚持几关？\n\n"
-                      "道具说明：\n【放大镜】检查弹膛中当前的子弹。\n【香烟】消除压力，恢复1点生命值。\n【手铐】对方下一回合无法行动（不可叠加，和射自己的跳过效果覆盖）。\n【护木】弹出霰弹枪膛内当前的子弹。\n"
+                      "道具说明：\n【放大镜】检查弹膛中当前的子弹。\n【香烟】消除压力，恢复1点生命值（小于等于2点生命值不可使用）。\n【手铐】对方下一回合无法行动（不可叠加，和射自己的跳过效果覆盖）。\n【护木】弹出霰弹枪膛内当前的子弹。\n"
                       "【手锯】霰弹枪造成2点伤害（不可叠加）。\n【逆转器】切换弹膛内当前子弹为实弹或空包弹(实弹换空包弹，空包弹换实弹)。\n【过期药品】有40%的几率恢复2点生命值，否则将损失1点生命值。\n"
                       "【窃贼手套】偷窃一件物品并立即使用。\n【小灵通】一个神秘的声音，让你窥探未来(告诉你枪里第几颗子弹是实弹还是空包弹，不能查看当前子弹，告诉的数量随枪中子弹数变化，最多3个)。\n\n"
                       "策略说明：\n向自己开枪，如果枪中为空包弹，对手跳过下一回合。\n向对手开枪，如果枪中为实弹，对手损失相应伤害的生命值。\n"
@@ -69,17 +70,20 @@ void Startup::change_btn_enable()
     }
 
     QString btnText[9]={"放大镜","香烟","手铐","护木","手锯","逆转器","过期药品","窃贼手套","小灵通"};
+    for (int i = 1; i <= 9; i++) {
+        QPushButton *button = ui->groupBox_3->findChild<QPushButton*>(QString("pushButton_%1").arg(i));
+        if (Model::getInstance().player_items[i-1]>0) {
+            if (Model::getInstance().whos_turn==1&&!Model::getInstance().jump_next[1])
+                button->setEnabled(true);
+            button->setText(btnText[i-1]+QString(" %1").arg(Model::getInstance().player_items[i-1]));
+        }
+        else
+            button->setText(btnText[i-1]);
+    }
     if (Model::getInstance().whos_turn==1&&!Model::getInstance().jump_next[1])
     {
-        for (int i = 1; i <= 9; i++) {
-            QPushButton *button = ui->groupBox_3->findChild<QPushButton*>(QString("pushButton_%1").arg(i));
-            if (Model::getInstance().player_items[i-1]>0) {
-                button->setEnabled(true);
-                button->setText(btnText[i-1]+QString(" %1").arg(Model::getInstance().player_items[i-1]));
-            }
-            else
-                button->setText(btnText[i-1]);
-        }
+        if (Model::getInstance().blood[1]<=2)
+            ui->pushButton_2->setEnabled(false);
         if (Model::getInstance().gun_status.size()<=1)
             ui->pushButton_9->setEnabled(false);
         ui->pushButton_10->setEnabled(true);
@@ -138,10 +142,10 @@ void Startup::update_shown_text(QString rival_ation,QString text_log_addition)
             count_false++;
     }
     QString text_3=QString("<center>对手血量：%1<br/>玩家血量：%2<br/>满血血量：%3<br/>霰弹枪状态：<br/>剩余：<br/>%4发实弹<br/>%5发空包弹</center>").
-                     arg(Model::getInstance().blood[0]).arg(Model::getInstance().blood[1]).arg(std::min(5,2+Model::getInstance().level/2)).arg(count_true).arg(count_false);
+                     arg(Model::getInstance().blood[0]).arg(Model::getInstance().blood[1]).arg(std::min(7,(Model::getInstance().level+5)/2)).arg(count_true).arg(count_false);
     if (use_swap)
         text_3=QString("<center>对手血量：%1<br/>玩家血量：%2<br/>满血血量：%3<br/>霰弹枪状态：<br/>剩余：<br/>%4发子弹</center>").
-                 arg(Model::getInstance().blood[0]).arg(Model::getInstance().blood[1]).arg(std::min(5,2+Model::getInstance().level/2)).arg(Model::getInstance().gun_status.size());
+                 arg(Model::getInstance().blood[0]).arg(Model::getInstance().blood[1]).arg(std::min(7,(Model::getInstance().level+5)/2)).arg(Model::getInstance().gun_status.size());
     ui->textEdit_3->setText(text_3);
 
     // 插入红色文本
@@ -306,8 +310,8 @@ void Startup::on_pushButton_3_clicked()
 void Startup::on_pushButton_4_clicked()
 {
     int gun_size=Model::getInstance().gun_status.size();
+    update_shown_text("",QString("你退出了一发%1，枪内还有%2发子弹<br/>").arg(Model::getInstance().gun_status.head()==0?"空包弹":"实弹").arg(gun_size-1));
     Model::getInstance().use_item(1,3);
-    update_shown_text("",QString("你退出了当前子弹，枪内还有%1发子弹<br/>").arg(Model::getInstance().gun_status.size()));
     change_btn_enable();
     if (gun_size==1)
     {
@@ -400,9 +404,9 @@ void Startup::on_pushButton_9_clicked()
 
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
-    std::vector<int> values(Model::getInstance().gun_status.size());
-    for (int i = 0; i < Model::getInstance().gun_status.size(); ++i) {
-        values[i] = i + 1;
+    std::vector<int> values(Model::getInstance().gun_status.size()-1);
+    for (int i = 1; i < Model::getInstance().gun_status.size(); i++) {
+        values[i-1] = i + 1;
     }
 
     // 打乱序列
@@ -413,6 +417,8 @@ void Startup::on_pushButton_9_clicked()
     QString str="你呼叫了场外，场外告诉你";
     for (int random_number : random_numbers)
     {
+        if (Model::getInstance().level>=17&&Model::getInstance().level<20)
+            AI::getInstance().bullet_known(Model::getInstance().gun_status,random_number-1,Model::getInstance().gun_status[random_number-1]);
         str+=QString("，第%1发子弹是%2").arg(random_number).arg(Model::getInstance().gun_status[random_number-1]==0?"空包弹":"实弹");
     }
     str+="<br/>";
@@ -499,6 +505,7 @@ choice_switch:
     case 1:
         Model::getInstance().use_item(0,0);
         use_swap=false;
+        AI::getInstance().bullet_known(Model::getInstance().gun_status,0,Model::getInstance().gun_status.head());
         update_shown_text("对手使用了放大镜","对手查看了当前子弹<br/>");
         break;
     case 2:
@@ -512,8 +519,8 @@ choice_switch:
     case 4:
     {
         int gun_size=Model::getInstance().gun_status.size();
+        update_shown_text("对手使用了护木",QString("对手退出了一发%1，枪内还有%2发子弹<br/>").arg(Model::getInstance().gun_status.head()==0?"空包弹":"实弹").arg(gun_size-1));
         Model::getInstance().use_item(0,3);
-        update_shown_text("对手使用了护木",QString("对手退出了当前子弹，枪内还有%1发子弹<br/>").arg(Model::getInstance().gun_status.size()));
         if (gun_size==1)
         {
             QApplication::processEvents();
@@ -553,10 +560,13 @@ choice_switch:
     case 8:
     {
         Model::getInstance().use_item(0,7,AI::getInstance().want_steal-1);
+        change_btn_enable();
         QString btnText[9]={"放大镜","香烟","手铐","护木","手锯","逆转器","过期药品","窃贼手套","小灵通"};
         update_shown_text("对手使用了窃贼手套",QString("对手趁你不注意，偷走了你的%1，并立即使用<br/>").arg(btnText[AI::getInstance().want_steal-1]));
         if (AI::getInstance().want_steal!=8)
         {
+            QApplication::processEvents();
+            QThread::msleep(2200);
             move_index=AI::getInstance().want_steal;
             goto choice_switch;
         }
@@ -568,20 +578,20 @@ choice_switch:
 
         unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
         std::default_random_engine generator(seed);
-        std::vector<int> values(Model::getInstance().gun_status.size());
-        for (int i = 0; i < Model::getInstance().gun_status.size(); ++i) {
-            values[i] = i + 1;
+        std::vector<int> values(Model::getInstance().gun_status.size()-1);
+        for (int i = 1; i < Model::getInstance().gun_status.size(); i++) {
+            values[i-1] = i + 1;
         }
 
         // 打乱序列
         std::shuffle(values.begin(), values.end(), generator);
         std::vector<int> random_numbers(values.begin(), values.begin() + (Model::getInstance().gun_status.size() + 3) / 4);
         std::sort(random_numbers.begin(), random_numbers.end());
+        if (Model::getInstance().level<17||Model::getInstance().level>=20)
+            for (int random_number : random_numbers)
+                AI::getInstance().bullet_known(Model::getInstance().gun_status,random_number-1,Model::getInstance().gun_status[random_number-1]);
 
-        for (int random_number : random_numbers)
-            AI::getInstance().bullet_known(random_number,Model::getInstance().gun_status[random_number]);
-
-        update_shown_text("对手使用了小灵通","对手呼叫了场外，场外告诉了他某些子弹的位置");
+        update_shown_text("对手使用了小灵通","对手呼叫了场外，场外告诉了他某些子弹的位置<br/>");
     }
         break;
     case 10:

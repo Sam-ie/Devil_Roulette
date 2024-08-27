@@ -15,8 +15,11 @@ public:
     int get_action();
 
     void set_shoot(int is_real);
-    void bullet_known(int position,bool is_real);
-    void reload();
+    void bullet_known(QQueue<int> gun_status,int position,bool is_real);
+    void reload(QQueue<int> gun_status);
+
+    bool saveSettings();
+    bool loadSettings();
 
 public:
     int want_steal=0; // 1-9
