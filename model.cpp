@@ -131,22 +131,25 @@ int Model::determined_winner()
 
 void Model::newTurn()
 {
-    int bullet_num=std::min(10,2+level);
+    int bullet_num = std::min(10, 2 + level);
+
     // 使用当前时间作为随机数生成器的种子
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
 
-    // 使用 std::normal_distribution 来生成接近均值的随机数
-    std::normal_distribution<double> distribution(0.5, 0.1); // 均值为 0.5，标准差较小
+    // 生成1/3到2/3之间数量的1
+    std::uniform_int_distribution<int> distribution(bullet_num / 3, (2 * bullet_num+2) / 3);
+    int ones_count = distribution(generator);
 
-    for (int i = 0; i < bullet_num; ++i) {
-        double randomValue = distribution(generator);
-        if (randomValue >= 0.5) {
-            gun_status.enqueue(1);
-        } else {
-            gun_status.enqueue(0);
-        }
+    // 创建一个包含1和0的序列
+    gun_status.resize(bullet_num, 0); // 初始化为全0
+    for (int i = 0; i < ones_count; ++i) {
+        gun_status[i] = 1; // 将前ones_count个元素设为1
     }
+
+    // 使用 std::shuffle 进行随机排序
+    std::shuffle(gun_status.begin(), gun_status.end(), generator);
+
     AI::getInstance().reload(gun_status);
     for (int i = 0; i < 9; ++i) // 注释此处即可各轮间继承道具
     {

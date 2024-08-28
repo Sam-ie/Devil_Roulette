@@ -7,6 +7,10 @@ Startup::Startup(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // 设置程序图标
+    QIcon icon(":/icon.ico");
+    this->setWindowIcon(icon);
+
     // 禁用窗口的最大化按钮
     setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
     // 禁止窗口调整大小
@@ -310,8 +314,9 @@ void Startup::on_pushButton_3_clicked()
 void Startup::on_pushButton_4_clicked()
 {
     int gun_size=Model::getInstance().gun_status.size();
-    update_shown_text("",QString("你退出了一发%1，枪内还有%2发子弹<br/>").arg(Model::getInstance().gun_status.head()==0?"空包弹":"实弹").arg(gun_size-1));
+    QString str=QString("你退出了一发%1，枪内还有%2发子弹<br/>").arg(Model::getInstance().gun_status.head()==0?"空包弹":"实弹").arg(gun_size-1);
     Model::getInstance().use_item(1,3);
+    update_shown_text("",str);
     change_btn_enable();
     if (gun_size==1)
     {
@@ -519,8 +524,9 @@ choice_switch:
     case 4:
     {
         int gun_size=Model::getInstance().gun_status.size();
-        update_shown_text("对手使用了护木",QString("对手退出了一发%1，枪内还有%2发子弹<br/>").arg(Model::getInstance().gun_status.head()==0?"空包弹":"实弹").arg(gun_size-1));
+        QString str=QString("对手退出了一发%1，枪内还有%2发子弹<br/>").arg(Model::getInstance().gun_status.head()==0?"空包弹":"实弹").arg(gun_size-1);
         Model::getInstance().use_item(0,3);
+        update_shown_text("对手使用了护木",str);
         if (gun_size==1)
         {
             QApplication::processEvents();

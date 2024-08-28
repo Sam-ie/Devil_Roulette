@@ -59,7 +59,7 @@ int AI::expert_mod()
         {
             if (Model::getInstance().player_items[order[i]]>0)
             {
-                want_steal=order[i];
+                want_steal=order[i]+1;
                 return 8;
             }
         }
@@ -223,7 +223,7 @@ int AI::nightmare_mod()
             bullet_predict[0]=1-bullet_predict[0];
             return 8;
         }
-        if (Model::getInstance().player_items[3]>0&&Model::getInstance().rival_items[3]==0&&bullet_predict[0]>0.3&&bullet_predict[0]<0.7)
+        if (Model::getInstance().player_items[3]>0&&Model::getInstance().rival_items[3]==0&&((double)unknown_real/unknown_total>=0.7||(double)unknown_real/unknown_total<=0.3))
         {
             want_steal=4;
             return 8;
