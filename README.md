@@ -1,7 +1,8 @@
 Only available in Chinese version.
 
 Steam游戏《恶魔轮盘》文字版
-——————————————————————————————————————————————————————————
+
+![image](https://github.com/user-attachments/assets/b083d605-868d-44fb-9643-b06d5bd85989)
 
 和原版的改动：
 
